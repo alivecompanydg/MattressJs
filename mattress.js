@@ -9,6 +9,7 @@ class Mattress{
         this.cnv = ""
         this.ctx = ""
         this.host = ""
+        this.header = ""
     }
 
     clear() {
@@ -116,6 +117,11 @@ class Mattress{
     }
 
     configure(command) {
+        if(command.header){
+            this.header = command.header
+        }else{
+            this.header = ""
+        }
         if(command.port){
             this.host = `${command.host}:${command.port}/`
         }else{
@@ -123,7 +129,7 @@ class Mattress{
         }
     }
 
-    get(route ,command, func) {
+    get(func, route, command) {
         let newHost = this.host+="/"
         if(route){
             newHost+=route
@@ -137,7 +143,39 @@ class Mattress{
             }
             newHost = newHost.substring(0,(newHost.length - 1))
         }
-        fetch(newHost)
+        fetch(newHost, {
+            mode:"cors",
+            method:"GET"
+        })
+        .then((response) => {
+            return response.json()
+        })
+        .then((data) => {
+            func(data)
+        })
+        .catch((err) => {
+            console.log(err)
+        })
+    }
+
+    post(func, route, command) {
+        let newHost = this.host+="/"
+        if(route){
+            newHost+=route
+        }
+        if(command){
+            newHost += "?"
+            for(const index in command){
+                const itemName = index
+                const itemValue = command[index]
+                newHost += `${itemName}=${itemValue}&`
+            }
+            newHost = newHost.substring(0,(newHost.length - 1))
+        }
+        fetch(newHost, {
+            mode:"cors",
+            method:"POST"
+        })
         .then((response) => {
             return response.json()
         })
