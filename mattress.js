@@ -8,6 +8,7 @@ class Mattress{
         this.singleIdentifier = ""
         this.cnv = ""
         this.ctx = ""
+        this.host = ""
     }
 
     clear() {
@@ -112,6 +113,40 @@ class Mattress{
         sound.src = musicSrc
         sound.type = "audio/mpeg"
         sound.play()
+    }
+
+    configure(command) {
+        if(command.port){
+            this.host = `${command.host}:${command.port}/`
+        }else{
+            this.host = `${command.host}`
+        }
+    }
+
+    get(route ,command, func) {
+        let newHost = this.host+="/"
+        if(route){
+            newHost+=route
+        }
+        if(command){
+            newHost += "?"
+            for(const index in command){
+                const itemName = index
+                const itemValue = command[index]
+                newHost += `${itemName}=${itemValue}&`
+            }
+            newHost = newHost.substring(0,(newHost.length - 1))
+        }
+        fetch(newHost)
+        .then((response) => {
+            return response.json()
+        })
+        .then((data) => {
+            func(data)
+        })
+        .catch((err) => {
+            console.log(err)
+        })
     }
 
 }
